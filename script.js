@@ -1,55 +1,83 @@
+"use strict";
+
 const API_URL = "https://api.jsonbin.io/v3/b/675b2d3bacd3cb34a8b89468";
 const API_KEY = "$2a$10$T79c8Xw94EQ3CD0Qo8hE5OrmvRaqvTSPhEyviFnpbLllyDqFHsSIW";
+const ACCESS_KEY = "$2a$10$ikZdSAnChbPazeHhug/IM.bSee06K3fX4ADBs2jjQ3Pf.Zk8KK7fe";
 
-// Select elements
+// DOM Elements
 const counterDisplay = document.getElementById('counter');
 const incrementButton = document.getElementById('increment');
 const decrementButton = document.getElementById('decrement');
 
+// Counter Value
 let counterValue = 0;
 
-// Fetch initial value from JSONBin
-const fetchCounter = () => {
+// Fetch Counter Value from JSONBin
+const fetchCounterFromBin = () => {
     let req = new XMLHttpRequest();
+
     req.onreadystatechange = () => {
-        if (req.readyState == XMLHttpRequest.DONE) {
-            const response = JSON.parse(req.responseText);
-            counterValue = response.record.value; // Assuming { "value": 0 } structure in JSONBin
-            updateCounterDisplay();
+        if (req.readyState === XMLHttpRequest.DONE) {
+            if (req.status === 200) {
+                const data = JSON.parse(req.responseText);
+                counterValue = data.value || 0; // Default to 0 if the value is missing
+                updateCounterDisplay();
+            } else {
+                console.error("Failed to fetch counter from JSONBin:", req.status, req.responseText);
+            }
         }
     };
+
     req.open("GET", `${API_URL}/latest`, true);
     req.setRequestHeader("X-Master-Key", API_KEY);
+    req.setRequestHeader("X-Access-Key", ACCESS_KEY);
     req.send();
 };
 
-// Update the counter value in JSONBin
-const updateJSONBin = () => {
+// Update Counter Value in JSONBin
+const updateCounterInBin = () => {
     let req = new XMLHttpRequest();
+
+    req.onreadystatechange = () => {
+        if (req.readyState === XMLHttpRequest.DONE) {
+            if (req.status === 200) {
+                console.log("Counter updated in JSONBin:", req.responseText);
+            } else {
+                console.error("Failed to update counter in JSONBin:", req.status, req.responseText);
+            }
+        }
+    };
+
     req.open("PUT", API_URL, true);
     req.setRequestHeader("Content-Type", "application/json");
     req.setRequestHeader("X-Master-Key", API_KEY);
+    req.setRequestHeader("X-Access-Key", ACCESS_KEY);
     req.send(JSON.stringify({ value: counterValue }));
 };
 
-// Update the display
+// Update Counter Display
 const updateCounterDisplay = () => {
     counterDisplay.textContent = counterValue;
 };
 
-// Increment counter
+// Increment Counter
 incrementButton.addEventListener('click', () => {
     counterValue++;
     updateCounterDisplay();
-    updateJSONBin();
 });
 
-// Decrement counter
+// Decrement Counter
 decrementButton.addEventListener('click', () => {
     counterValue--;
     updateCounterDisplay();
-    updateJSONBin();
 });
 
-// Initialize counter
-fetchCounter();
+// Event: Fetch counter on page load
+window.onload = () => {
+    fetchCounterFromBin();
+};
+
+// Event: Update counter in bin on page unload
+window.onbeforeunload = () => {
+    updateCounterInBin();
+};
