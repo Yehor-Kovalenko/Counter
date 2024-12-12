@@ -1,4 +1,4 @@
-const API_URL = "https://api.jsonbin.io/v3/b/675b2d3bacd3cb34a8b89468/latest";
+const API_URL = "https://api.jsonbin.io/v3/b/675b2d3bacd3cb34a8b89468";
 const API_KEY = "$2a$10$T79c8Xw94EQ3CD0Qo8hE5OrmvRaqvTSPhEyviFnpbLllyDqFHsSIW";
 
 // Select elements
